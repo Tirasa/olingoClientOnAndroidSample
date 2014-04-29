@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="vertical" >
+    <TextView
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:text="Apache Olingo Android demo"/>
+    <Button 
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:text="GET"
+        android:id="@+id/my_button"/>
+   	<EditText 
+	    android:layout_margin="20dip"
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content"
+	    android:minLines="15"
+	    android:maxLines="15"
+	    android:textSize="12sp"
+	    android:editable="false"
+	    android:id="@+id/my_edit"/>
+</LinearLayout>
