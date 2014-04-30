@@ -44,18 +44,6 @@
       <groupId>org.apache.olingo</groupId>
       <artifactId>olingo-client-core-android</artifactId>
       <version>${olingo4.version}</version>
-      <exclusions>
-        <exclusion>
-          <groupId>org.apache.olingo</groupId>
-          <artifactId>olingo-commons-core</artifactId>          
-        </exclusion>
-      </exclusions>
-    </dependency>
-    
-    <dependency>
-      <groupId>org.apache.httpcomponents</groupId>
-      <artifactId>httpclient</artifactId>
-      <version>4.2.6</version>
     </dependency>
   </dependencies>
   
