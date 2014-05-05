@@ -11,7 +11,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:text="GET"
+        android:text="GO"
         android:id="@+id/my_button"/>
    	<EditText 
 	    android:layout_margin="20dip"

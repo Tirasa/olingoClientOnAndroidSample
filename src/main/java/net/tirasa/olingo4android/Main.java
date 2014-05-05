@@ -23,16 +23,25 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.EditText;
+import org.apache.olingo.client.api.communication.request.cud.ODataEntityCreateRequest;
+import org.apache.olingo.client.api.communication.request.cud.ODataEntityUpdateRequest;
+import org.apache.olingo.client.api.communication.request.cud.v4.UpdateType;
 import org.apache.olingo.client.api.communication.request.retrieve.ODataEntityRequest;
+import org.apache.olingo.client.api.communication.response.ODataDeleteResponse;
+import org.apache.olingo.client.api.communication.response.ODataEntityCreateResponse;
+import org.apache.olingo.client.api.communication.response.ODataEntityUpdateResponse;
 import org.apache.olingo.client.api.v4.ODataClient;
 import org.apache.olingo.client.core.ODataClientFactory;
 import org.apache.olingo.commons.api.domain.v4.ODataEntity;
 import org.apache.olingo.commons.api.edm.Edm;
+import org.apache.olingo.commons.api.edm.EdmPrimitiveTypeKind;
+import org.apache.olingo.commons.api.edm.FullQualifiedName;
 import org.apache.olingo.commons.api.format.ODataPubFormat;
 
 public class Main extends Activity implements OnClickListener {
 
-    private static final String SERVICE_ROOT = "http://services.odata.org/V4/OData/OData.svc";
+    private static final String SERVICE_ROOT =
+            "http://services.odata.org/V4/OData/(S(obimzejxivyhzdmpnlc1a4fq))/OData.svc";
 
     @Override
     public void onCreate(final Bundle savedInstanceState) {
@@ -104,6 +113,55 @@ public class Main extends Activity implements OnClickListener {
                 text.append(e.getLocalizedMessage()).append('\n');
             }
 
+            // ------------------ CRUD  ------------------
+            text.append('\n').append("[CRUD]").append('\n');
+            final ODataEntity newProduct = client.getObjectFactory().
+                    newEntity(new FullQualifiedName("ODataDemo.Product"));
+            newProduct.getProperties().add(client.getObjectFactory().newPrimitiveProperty("ID",
+                    client.getObjectFactory().newPrimitiveValueBuilder().buildInt32(111)));
+            newProduct.getProperties().add(client.getObjectFactory().newPrimitiveProperty("Name",
+                    client.getObjectFactory().newPrimitiveValueBuilder().buildString("OlingoDemoProduct")));
+            newProduct.getProperties().add(client.getObjectFactory().newPrimitiveProperty("Description",
+                    client.getObjectFactory().newPrimitiveValueBuilder().buildString("Olingo Demo Product")));
+            newProduct.getProperties().add(client.getObjectFactory().newPrimitiveProperty("ReleaseDate",
+                    client.getObjectFactory().newPrimitiveValueBuilder().
+                    setType(EdmPrimitiveTypeKind.DateTimeOffset).setText("2014-05-04T00:00:00Z").build()));
+            newProduct.getProperties().add(client.getObjectFactory().newPrimitiveProperty("Rating",
+                    client.getObjectFactory().newPrimitiveValueBuilder().
+                    setType(EdmPrimitiveTypeKind.Int16).setValue(1).build()));
+            newProduct.getProperties().add(client.getObjectFactory().newPrimitiveProperty("Price",
+                    client.getObjectFactory().newPrimitiveValueBuilder().buildSingle(1.0F)));
+
+            try {
+                // create
+                final ODataEntityCreateRequest<ODataEntity> createReq = client.getCUDRequestFactory().
+                        getEntityCreateRequest(
+                                client.getURIBuilder(SERVICE_ROOT).appendEntitySetSegment("Products").build(),
+                                newProduct);
+                final ODataEntityCreateResponse<ODataEntity> createRes = createReq.execute();
+                text.append("Product created: ").append(createRes.getStatusCode()).append('\n');
+
+                // update
+                final ODataEntity created = createRes.getBody();
+
+                final ODataEntity changes = client.getObjectFactory().newEntity(created.getTypeName());
+                changes.getProperties().add(client.getObjectFactory().newPrimitiveProperty("DiscontinuedDate",
+                        client.getObjectFactory().newPrimitiveValueBuilder().
+                        setType(EdmPrimitiveTypeKind.DateTimeOffset).setText("2014-05-04T00:00:00Z").build()));
+                final ODataEntityUpdateRequest<ODataEntity> updateReq = client.getCUDRequestFactory().
+                        getEntityUpdateRequest(created.getEditLink(), UpdateType.PATCH, changes);
+                final ODataEntityUpdateResponse<ODataEntity> updateRes = updateReq.execute();
+                text.append("Product updated: ").append(updateRes.getStatusCode()).append('\n');
+
+                // delete
+                final ODataDeleteResponse deleteRes =
+                        client.getCUDRequestFactory().getDeleteRequest(created.getEditLink()).execute();
+                text.append("Product deleted: ").append(deleteRes.getStatusCode()).append('\n');
+            } catch (Exception e) {
+                Log.e("ERROR", "CRUD", e);
+                text.append(e.getLocalizedMessage()).append('\n');
+            }
+
             // ------------------ JSON ------------------
             text.append('\n').append("[JSON]").append('\n');
             try {
@@ -115,7 +173,7 @@ public class Main extends Activity implements OnClickListener {
 
                 output(text, jsonProduct);
             } catch (Exception e) {
-                Log.e("ERROR", "JSON - Engine", e);
+                Log.e("ERROR", "JSON - READ", e);
                 text.append(e.getLocalizedMessage()).append('\n');
             }
 
@@ -130,7 +188,7 @@ public class Main extends Activity implements OnClickListener {
 
                 output(text, atomProduct);
             } catch (Exception e) {
-                Log.e("ERROR", "Atom - Engine", e);
+                Log.e("ERROR", "Atom - READ", e);
                 text.append(e.getLocalizedMessage()).append('\n');
             }
 
