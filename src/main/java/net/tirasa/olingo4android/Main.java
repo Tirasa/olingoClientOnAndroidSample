@@ -23,6 +23,12 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.EditText;
+import java.util.Arrays;
+import net.tirasa.olingo4android.net.azurewebsites.odatae2etest.microsoft.test.odata.services.odatawcfservice.InMemoryEntities;
+import net.tirasa.olingo4android.net.azurewebsites.odatae2etest.microsoft.test.odata.services.odatawcfservice.types.AccessLevel;
+import net.tirasa.olingo4android.net.azurewebsites.odatae2etest.microsoft.test.odata.services.odatawcfservice.types.Color;
+import net.tirasa.olingo4android.net.azurewebsites.odatae2etest.microsoft.test.odata.services.odatawcfservice.types.Product;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.olingo.client.api.communication.request.cud.ODataEntityCreateRequest;
 import org.apache.olingo.client.api.communication.request.cud.ODataEntityUpdateRequest;
 import org.apache.olingo.client.api.communication.request.cud.v4.UpdateType;
@@ -34,14 +40,12 @@ import org.apache.olingo.client.api.v4.ODataClient;
 import org.apache.olingo.client.core.ODataClientFactory;
 import org.apache.olingo.commons.api.domain.v4.ODataEntity;
 import org.apache.olingo.commons.api.edm.Edm;
-import org.apache.olingo.commons.api.edm.EdmPrimitiveTypeKind;
 import org.apache.olingo.commons.api.edm.FullQualifiedName;
-import org.apache.olingo.commons.api.format.ODataPubFormat;
+import org.apache.olingo.ext.proxy.EntityContainerFactory;
 
 public class Main extends Activity implements OnClickListener {
 
-    private static final String SERVICE_ROOT =
-            "http://services.odata.org/V4/OData/(S(obimzejxivyhzdmpnlc1a4fq))/OData.svc";
+    private static final String SERVICE_ROOT = "http://odatae2etest.azurewebsites.net/javatest/DefaultService";
 
     @Override
     public void onCreate(final Bundle savedInstanceState) {
@@ -66,8 +70,8 @@ public class Main extends Activity implements OnClickListener {
         }
 
         private void output(final StringBuilder text, final ODataEntity product) {
-            text.append("ID: ").
-                    append(product.getProperty("ID").getValue().asPrimitive().toString()).
+            text.append("ProductID: ").
+                    append(product.getProperty("ProductID").getValue().asPrimitive().toString()).
                     append('\n');
 
             if (product.getProperty("Name") != null) {
@@ -75,24 +79,56 @@ public class Main extends Activity implements OnClickListener {
                         append(product.getProperty("Name").getValue().asPrimitive().toString()).
                         append('\n');
             }
-            if (product.getProperty("Description") != null) {
-                text.append("Description: ").
-                        append(product.getProperty("Description").getValue().asPrimitive().toString()).
+            if (product.getProperty("QuantityPerUnit") != null) {
+                text.append("QuantityPerUnit: ").
+                        append(product.getProperty("QuantityPerUnit").getValue().asPrimitive().toString()).
                         append('\n');
             }
-            if (product.getProperty("ReleaseDate") != null) {
-                text.append("Release date: ").
-                        append(product.getProperty("ReleaseDate").getValue().asPrimitive().toString()).
+            if (product.getProperty("UnitPrice") != null) {
+                text.append("UnitPrice: ").
+                        append(product.getProperty("UnitPrice").getValue().asPrimitive().toString()).
                         append('\n');
             }
-            if (product.getProperty("Rating") != null) {
-                text.append("Rating: ").
-                        append(product.getProperty("Rating").getValue().asPrimitive().toString()).
+            if (product.getProperty("QuantityInStock") != null) {
+                text.append("QuantityInStock: ").
+                        append(product.getProperty("QuantityInStock").getValue().asPrimitive().toString()).
                         append('\n');
             }
-            if (product.getProperty("Price") != null) {
-                text.append("Price: ").
-                        append(product.getProperty("Price").getValue().asPrimitive().toString()).
+            if (product.getProperty("UserAccess") != null) {
+                text.append("UserAccess: ").
+                        append(product.getProperty("UserAccess").getValue().asEnum().toString()).
+                        append('\n');
+            }
+        }
+
+        private void output(final StringBuilder text, final Product product) {
+            text.append("ProductID: ").
+                    append(product.getProductID()).
+                    append('\n');
+
+            if (product.getName() != null) {
+                text.append("Name: ").
+                        append(product.getName()).
+                        append('\n');
+            }
+            if (product.getQuantityPerUnit() != null) {
+                text.append("QuantityPerUnit: ").
+                        append(product.getQuantityPerUnit()).
+                        append('\n');
+            }
+            if (product.getUnitPrice() != null) {
+                text.append("UnitPrice: ").
+                        append(product.getUnitPrice()).
+                        append('\n');
+            }
+            if (product.getQuantityInStock() != null) {
+                text.append("QuantityInStock: ").
+                        append(product.getQuantityInStock()).
+                        append('\n');
+            }
+            if (product.getUserAccess() != null) {
+                text.append("UserAccess: ").
+                        append(product.getUserAccess()).
                         append('\n');
             }
         }
@@ -113,24 +149,36 @@ public class Main extends Activity implements OnClickListener {
                 text.append(e.getLocalizedMessage()).append('\n');
             }
 
-            // ------------------ CRUD  ------------------
-            text.append('\n').append("[CRUD]").append('\n');
+            // ------------------ CORE ------------------
+            text.append('\n').append("[CUD (core)]").append('\n');
+
             final ODataEntity newProduct = client.getObjectFactory().
-                    newEntity(new FullQualifiedName("ODataDemo.Product"));
-            newProduct.getProperties().add(client.getObjectFactory().newPrimitiveProperty("ID",
+                    newEntity(new FullQualifiedName("Microsoft.Test.OData.Services.ODataWCFService.Product"));
+            newProduct.getProperties().add(client.getObjectFactory().newPrimitiveProperty("ProductID",
                     client.getObjectFactory().newPrimitiveValueBuilder().buildInt32(111)));
             newProduct.getProperties().add(client.getObjectFactory().newPrimitiveProperty("Name",
-                    client.getObjectFactory().newPrimitiveValueBuilder().buildString("OlingoDemoProduct")));
-            newProduct.getProperties().add(client.getObjectFactory().newPrimitiveProperty("Description",
-                    client.getObjectFactory().newPrimitiveValueBuilder().buildString("Olingo Demo Product")));
-            newProduct.getProperties().add(client.getObjectFactory().newPrimitiveProperty("ReleaseDate",
-                    client.getObjectFactory().newPrimitiveValueBuilder().
-                    setType(EdmPrimitiveTypeKind.DateTimeOffset).setText("2014-05-04T00:00:00Z").build()));
-            newProduct.getProperties().add(client.getObjectFactory().newPrimitiveProperty("Rating",
-                    client.getObjectFactory().newPrimitiveValueBuilder().
-                    setType(EdmPrimitiveTypeKind.Int16).setValue(1).build()));
-            newProduct.getProperties().add(client.getObjectFactory().newPrimitiveProperty("Price",
-                    client.getObjectFactory().newPrimitiveValueBuilder().buildSingle(1.0F)));
+                    client.getObjectFactory().newPrimitiveValueBuilder().buildString("Latte")));
+            newProduct.getProperties().add(client.getObjectFactory().newPrimitiveProperty("QuantityPerUnit",
+                    client.getObjectFactory().newPrimitiveValueBuilder().buildString("100g Bag")));
+            newProduct.getProperties().add(client.getObjectFactory().newPrimitiveProperty("UnitPrice",
+                    client.getObjectFactory().newPrimitiveValueBuilder().buildSingle(3.24f)));
+            newProduct.getProperties().add(client.getObjectFactory().newPrimitiveProperty("QuantityInStock",
+                    client.getObjectFactory().newPrimitiveValueBuilder().buildInt32(100)));
+            newProduct.getProperties().add(client.getObjectFactory().newPrimitiveProperty("Discontinued",
+                    client.getObjectFactory().newPrimitiveValueBuilder().buildBoolean(false)));
+            newProduct.getProperties().add(client.getObjectFactory().newEnumProperty("UserAccess",
+                    client.getObjectFactory().
+                    newEnumValue("Microsoft.Test.OData.Services.ODataWCFService.AccessLevel", "Execute")));
+            newProduct.getProperties().add(client.getObjectFactory().newEnumProperty("SkinColor",
+                    client.getObjectFactory().
+                    newEnumValue("Microsoft.Test.OData.Services.ODataWCFService.Color", "Blue")));
+            newProduct.getProperties().add(client.getObjectFactory().newCollectionProperty("CoverColors",
+                    client.getObjectFactory().
+                    newCollectionValue("Microsoft.Test.OData.Services.ODataWCFService.Color")));
+            newProduct.getProperty("CoverColors").getCollectionValue().add(client.getObjectFactory().
+                    newEnumValue("Microsoft.Test.OData.Services.ODataWCFService.Color", "Green"));
+            newProduct.getProperty("CoverColors").getCollectionValue().add(client.getObjectFactory().
+                    newEnumValue("Microsoft.Test.OData.Services.ODataWCFService.Color", "Red"));
 
             try {
                 // create
@@ -145,9 +193,8 @@ public class Main extends Activity implements OnClickListener {
                 final ODataEntity created = createRes.getBody();
 
                 final ODataEntity changes = client.getObjectFactory().newEntity(created.getTypeName());
-                changes.getProperties().add(client.getObjectFactory().newPrimitiveProperty("DiscontinuedDate",
-                        client.getObjectFactory().newPrimitiveValueBuilder().
-                        setType(EdmPrimitiveTypeKind.DateTimeOffset).setText("2014-05-04T00:00:00Z").build()));
+                changes.getProperties().add(client.getObjectFactory().newPrimitiveProperty("Discontinued",
+                        client.getObjectFactory().newPrimitiveValueBuilder().buildBoolean(true)));
                 final ODataEntityUpdateRequest<ODataEntity> updateReq = client.getCUDRequestFactory().
                         getEntityUpdateRequest(created.getEditLink(), UpdateType.PATCH, changes);
                 final ODataEntityUpdateResponse<ODataEntity> updateRes = updateReq.execute();
@@ -158,37 +205,66 @@ public class Main extends Activity implements OnClickListener {
                         client.getCUDRequestFactory().getDeleteRequest(created.getEditLink()).execute();
                 text.append("Product deleted: ").append(deleteRes.getStatusCode()).append('\n');
             } catch (Exception e) {
-                Log.e("ERROR", "CRUD", e);
+                Log.e("ERROR", "CUD (core)", e);
                 text.append(e.getLocalizedMessage()).append('\n');
             }
 
-            // ------------------ JSON ------------------
-            text.append('\n').append("[JSON]").append('\n');
+            text.append('\n').append("[READ (core)]").append('\n');
             try {
                 final ODataEntityRequest<ODataEntity> jsonReq = client.getRetrieveRequestFactory().
                         getEntityRequest(client.getURIBuilder(SERVICE_ROOT).
-                                appendEntitySetSegment("Products").appendKeySegment(0).build());
+                                appendEntitySetSegment("Products").appendKeySegment(5).build());
 
                 final ODataEntity jsonProduct = jsonReq.execute().getBody();
 
                 output(text, jsonProduct);
             } catch (Exception e) {
-                Log.e("ERROR", "JSON - READ", e);
+                Log.e("ERROR", "JSON READ (core)", e);
                 text.append(e.getLocalizedMessage()).append('\n');
             }
 
-            // ------------------ ATOM ------------------
-            text.append('\n').append("[Atom]").append('\n');
-            try {
-                final ODataEntityRequest<ODataEntity> atomReq = client.getRetrieveRequestFactory().
-                        getEntityRequest(client.getURIBuilder(SERVICE_ROOT).
-                                appendEntitySetSegment("Products").appendKeySegment(1).build());
-                atomReq.setFormat(ODataPubFormat.ATOM);
-                final ODataEntity atomProduct = atomReq.execute().getBody();
+            // ------------------ PROXY ------------------
+            final InMemoryEntities service =
+                    EntityContainerFactory.getV4(SERVICE_ROOT).getEntityContainer(InMemoryEntities.class);
 
-                output(text, atomProduct);
+            text.append('\n').append("[CUD (proxy)]").append('\n');
+            try {
+                Product product = service.getProducts().newProduct();
+                product.setProductID(112);
+                product.setName("Latte");
+                product.setQuantityPerUnit("100g Bag");
+                product.setUnitPrice(3.24f);
+                product.setQuantityInStock(100);
+                product.setDiscontinued(false);
+                product.setUserAccess(AccessLevel.Execute);
+                product.setSkinColor(Color.Blue);
+                product.setCoverColors(Arrays.asList(new Color[] { Color.Green, Color.Red }));
+
+                service.flush();
+                text.append("Product created").append('\n');
+
+                product = service.getProducts().get(112);
+                product.setDiscontinued(true);
+
+                service.flush();
+                text.append("Product updated").append('\n');
+
+                service.getProducts().delete(112);
+
+                service.flush();
+                text.append("Product deleted").append('\n');
             } catch (Exception e) {
-                Log.e("ERROR", "Atom - READ", e);
+                Log.e("ERROR", "CUD (proxy)", e);
+                text.append(e.getLocalizedMessage()).append('\n');
+            }
+
+            text.append('\n').append("[READ (proxy)]").append('\n');
+            try {
+                final Product product = service.getProducts().get(7);
+
+                output(text, product);
+            } catch (Exception e) {
+                Log.e("ERROR", "JSON READ (proxy)", e);
                 text.append(e.getLocalizedMessage()).append('\n');
             }
 

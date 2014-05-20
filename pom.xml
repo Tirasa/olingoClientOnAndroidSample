@@ -42,7 +42,7 @@
     
     <dependency>
       <groupId>org.apache.olingo</groupId>
-      <artifactId>olingo-client-core-android</artifactId>
+      <artifactId>olingo-client-proxy-android</artifactId>
       <version>${olingo4.version}</version>
     </dependency>
   </dependencies>
@@ -70,7 +70,27 @@
       </plugins>
     </pluginManagement>
     
-    <plugins>      
+    <plugins>           
+      <plugin>
+        <groupId>org.apache.olingo</groupId>
+        <artifactId>pojogen-maven-plugin</artifactId>
+        <version>${olingo4.version}</version>
+        <executions>
+          <execution>
+            <configuration>
+              <outputDirectory>${project.build.directory}/generated-sources</outputDirectory>
+              <serviceRootURL>http://odatae2etest.azurewebsites.net/javatest/DefaultService</serviceRootURL>
+              <basePackage>net.tirasa.olingo4android.net.azurewebsites.odatae2etest</basePackage>
+            </configuration>
+            <id>v4pojoGen</id>
+            <phase>generate-sources</phase>
+            <goals>
+              <goal>v4pojoGen</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+       
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>build-helper-maven-plugin</artifactId>
