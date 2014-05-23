@@ -103,7 +103,7 @@
             </goals>
             <configuration>
               <sources>
-                <source>${project.build.directory}/generated-sources</source>
+                <source>${project.build.directory}/generated-sources/ojc-plugin</source>
               </sources>
             </configuration>
           </execution>
@@ -156,6 +156,13 @@
         </executions>
       </plugin>
     </plugins>
+
+    <resources>
+      <resource>
+        <directory>${project.build.directory}/generated-sources/ojc-plugin/META-INF</directory>
+        <targetPath>${project.build.directory}/classes/META-INF</targetPath>
+      </resource>
+    </resources>
   </build>
 
   <repositories>

@@ -27,8 +27,8 @@ import java.util.Arrays;
 import net.tirasa.olingo4android.net.azurewebsites.odatae2etest.microsoft.test.odata.services.odatawcfservice.InMemoryEntities;
 import net.tirasa.olingo4android.net.azurewebsites.odatae2etest.microsoft.test.odata.services.odatawcfservice.types.AccessLevel;
 import net.tirasa.olingo4android.net.azurewebsites.odatae2etest.microsoft.test.odata.services.odatawcfservice.types.Color;
+import net.tirasa.olingo4android.net.azurewebsites.odatae2etest.microsoft.test.odata.services.odatawcfservice.types.GiftCard;
 import net.tirasa.olingo4android.net.azurewebsites.odatae2etest.microsoft.test.odata.services.odatawcfservice.types.Product;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.olingo.client.api.communication.request.cud.ODataEntityCreateRequest;
 import org.apache.olingo.client.api.communication.request.cud.ODataEntityUpdateRequest;
 import org.apache.olingo.client.api.communication.request.cud.v4.UpdateType;
@@ -133,6 +133,18 @@ public class Main extends Activity implements OnClickListener {
             }
         }
 
+        private void output(final StringBuilder text, final GiftCard giftcard) {
+            text.append("GiftCardID: ").
+                    append(giftcard.getGiftCardID()).
+                    append('\n');
+
+            if (giftcard.getGiftCardNO()!= null) {
+                text.append("GiftCardNO: ").
+                        append(giftcard.getGiftCardNO()).
+                        append('\n');
+            }
+        }
+
         @Override
         protected String doInBackground(final Void... params) {
             final StringBuilder text = new StringBuilder();
@@ -184,7 +196,7 @@ public class Main extends Activity implements OnClickListener {
                 // create
                 final ODataEntityCreateRequest<ODataEntity> createReq = client.getCUDRequestFactory().
                         getEntityCreateRequest(
-                                client.getURIBuilder(SERVICE_ROOT).appendEntitySetSegment("Products").build(),
+                                client.newURIBuilder(SERVICE_ROOT).appendEntitySetSegment("Products").build(),
                                 newProduct);
                 final ODataEntityCreateResponse<ODataEntity> createRes = createReq.execute();
                 text.append("Product created: ").append(createRes.getStatusCode()).append('\n');
@@ -212,7 +224,7 @@ public class Main extends Activity implements OnClickListener {
             text.append('\n').append("[READ (core)]").append('\n');
             try {
                 final ODataEntityRequest<ODataEntity> jsonReq = client.getRetrieveRequestFactory().
-                        getEntityRequest(client.getURIBuilder(SERVICE_ROOT).
+                        getEntityRequest(client.newURIBuilder(SERVICE_ROOT).
                                 appendEntitySetSegment("Products").appendKeySegment(5).build());
 
                 final ODataEntity jsonProduct = jsonReq.execute().getBody();
@@ -261,8 +273,11 @@ public class Main extends Activity implements OnClickListener {
             text.append('\n').append("[READ (proxy)]").append('\n');
             try {
                 final Product product = service.getProducts().get(7);
-
                 output(text, product);
+
+                // output a complex value
+                final GiftCard giftCard = service.getAccounts().get(101).getMyGiftCard();
+                output(text, giftCard);
             } catch (Exception e) {
                 Log.e("ERROR", "JSON READ (proxy)", e);
                 text.append(e.getLocalizedMessage()).append('\n');
