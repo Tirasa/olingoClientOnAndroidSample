@@ -36,8 +36,10 @@ import org.apache.olingo.client.api.communication.request.retrieve.ODataEntityRe
 import org.apache.olingo.client.api.communication.response.ODataDeleteResponse;
 import org.apache.olingo.client.api.communication.response.ODataEntityCreateResponse;
 import org.apache.olingo.client.api.communication.response.ODataEntityUpdateResponse;
+import org.apache.olingo.client.api.v4.EdmEnabledODataClient;
 import org.apache.olingo.client.api.v4.ODataClient;
 import org.apache.olingo.client.core.ODataClientFactory;
+import org.apache.olingo.client.core.android.http.AndroidHttpClientFactory;
 import org.apache.olingo.commons.api.domain.v4.ODataEntity;
 import org.apache.olingo.commons.api.edm.Edm;
 import org.apache.olingo.commons.api.edm.FullQualifiedName;
@@ -58,7 +60,10 @@ public class Main extends Activity implements OnClickListener {
     public void onClick(final View view) {
         final Button button = (Button) findViewById(R.id.my_button);
         button.setClickable(false);
-        new LongRunningGetIO(ODataClientFactory.getV4()).execute();
+        
+        final ODataClient client = ODataClientFactory.getV4();
+        client.getConfiguration().setHttpClientFactory(new AndroidHttpClientFactory());
+        new LongRunningGetIO(client).execute();
     }
 
     private class LongRunningGetIO extends AsyncTask<Void, Void, String> {
@@ -236,13 +241,14 @@ public class Main extends Activity implements OnClickListener {
             }
 
             // ------------------ PROXY ------------------
-            final InMemoryEntities service =
-                    EntityContainerFactory.getV4(SERVICE_ROOT).getEntityContainer(InMemoryEntities.class);
+            final EntityContainerFactory<EdmEnabledODataClient> ecf = EntityContainerFactory.getV4(SERVICE_ROOT);
+            ecf.getClient().getConfiguration().setHttpClientFactory(new AndroidHttpClientFactory());
+            final InMemoryEntities service = ecf.getEntityContainer(InMemoryEntities.class);
 
             text.append('\n').append("[CUD (proxy)]").append('\n');
             try {
                 Product product = service.getProducts().newProduct();
-                product.setProductID(112);
+                product.setProductID(117);
                 product.setName("Latte");
                 product.setQuantityPerUnit("100g Bag");
                 product.setUnitPrice(3.24f);
@@ -255,13 +261,13 @@ public class Main extends Activity implements OnClickListener {
                 service.flush();
                 text.append("Product created").append('\n');
 
-                product = service.getProducts().get(112);
+                product = service.getProducts().get(117);
                 product.setDiscontinued(true);
 
                 service.flush();
                 text.append("Product updated").append('\n');
 
-                service.getProducts().delete(112);
+                service.getProducts().delete(117);
 
                 service.flush();
                 text.append("Product deleted").append('\n');
