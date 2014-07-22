@@ -43,7 +43,7 @@ import org.apache.olingo.client.core.android.http.AndroidHttpClientFactory;
 import org.apache.olingo.commons.api.domain.v4.ODataEntity;
 import org.apache.olingo.commons.api.edm.Edm;
 import org.apache.olingo.commons.api.edm.FullQualifiedName;
-import org.apache.olingo.ext.proxy.EntityContainerFactory;
+import org.apache.olingo.ext.proxy.Service;
 
 public class Main extends Activity implements OnClickListener {
 
@@ -60,7 +60,7 @@ public class Main extends Activity implements OnClickListener {
     public void onClick(final View view) {
         final Button button = (Button) findViewById(R.id.my_button);
         button.setClickable(false);
-        
+
         final ODataClient client = ODataClientFactory.getV4();
         client.getConfiguration().setHttpClientFactory(new AndroidHttpClientFactory());
         new LongRunningGetIO(client).execute();
@@ -143,7 +143,7 @@ public class Main extends Activity implements OnClickListener {
                     append(giftcard.getGiftCardID()).
                     append('\n');
 
-            if (giftcard.getGiftCardNO()!= null) {
+            if (giftcard.getGiftCardNO() != null) {
                 text.append("GiftCardNO: ").
                         append(giftcard.getGiftCardNO()).
                         append('\n');
@@ -166,13 +166,14 @@ public class Main extends Activity implements OnClickListener {
                 text.append(e.getLocalizedMessage()).append('\n');
             }
 
+            final Integer productId = 118;
             // ------------------ CORE ------------------
             text.append('\n').append("[CUD (core)]").append('\n');
 
             final ODataEntity newProduct = client.getObjectFactory().
                     newEntity(new FullQualifiedName("Microsoft.Test.OData.Services.ODataWCFService.Product"));
             newProduct.getProperties().add(client.getObjectFactory().newPrimitiveProperty("ProductID",
-                    client.getObjectFactory().newPrimitiveValueBuilder().buildInt32(111)));
+                    client.getObjectFactory().newPrimitiveValueBuilder().buildInt32(productId)));
             newProduct.getProperties().add(client.getObjectFactory().newPrimitiveProperty("Name",
                     client.getObjectFactory().newPrimitiveValueBuilder().buildString("Latte")));
             newProduct.getProperties().add(client.getObjectFactory().newPrimitiveProperty("QuantityPerUnit",
@@ -241,14 +242,14 @@ public class Main extends Activity implements OnClickListener {
             }
 
             // ------------------ PROXY ------------------
-            final EntityContainerFactory<EdmEnabledODataClient> ecf = EntityContainerFactory.getV4(SERVICE_ROOT);
-            ecf.getClient().getConfiguration().setHttpClientFactory(new AndroidHttpClientFactory());
-            final InMemoryEntities service = ecf.getEntityContainer(InMemoryEntities.class);
+            final Service<EdmEnabledODataClient> service = Service.getV4(SERVICE_ROOT);
+            service.getClient().getConfiguration().setHttpClientFactory(new AndroidHttpClientFactory());
+            final InMemoryEntities container = service.getEntityContainer(InMemoryEntities.class);
 
             text.append('\n').append("[CUD (proxy)]").append('\n');
             try {
-                Product product = service.getProducts().newProduct();
-                product.setProductID(117);
+                Product product = service.newEntityInstance(Product.class);
+                product.setProductID(productId);
                 product.setName("Latte");
                 product.setQuantityPerUnit("100g Bag");
                 product.setUnitPrice(3.24f);
@@ -258,18 +259,20 @@ public class Main extends Activity implements OnClickListener {
                 product.setSkinColor(Color.Blue);
                 product.setCoverColors(Arrays.asList(new Color[] { Color.Green, Color.Red }));
 
-                service.flush();
+                container.getProducts().add(product);
+
+                container.flush();
                 text.append("Product created").append('\n');
 
-                product = service.getProducts().get(117);
+                product = container.getProducts().getByKey(productId);
                 product.setDiscontinued(true);
 
-                service.flush();
+                container.flush();
                 text.append("Product updated").append('\n');
 
-                service.getProducts().delete(117);
+                container.getProducts().delete(productId);
 
-                service.flush();
+                container.flush();
                 text.append("Product deleted").append('\n');
             } catch (Exception e) {
                 Log.e("ERROR", "CUD (proxy)", e);
@@ -278,11 +281,11 @@ public class Main extends Activity implements OnClickListener {
 
             text.append('\n').append("[READ (proxy)]").append('\n');
             try {
-                final Product product = service.getProducts().get(7);
+                final Product product = container.getProducts().getByKey(7).load();
                 output(text, product);
 
                 // output a complex value
-                final GiftCard giftCard = service.getAccounts().get(101).getMyGiftCard();
+                final GiftCard giftCard = container.getAccounts().getByKey(101).getMyGiftCard().load();
                 output(text, giftCard);
             } catch (Exception e) {
                 Log.e("ERROR", "JSON READ (proxy)", e);

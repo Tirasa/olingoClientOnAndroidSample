@@ -42,7 +42,7 @@
     
     <dependency>
       <groupId>org.apache.olingo</groupId>
-      <artifactId>olingo-client-proxy-android</artifactId>
+      <artifactId>olingo-client-android</artifactId>
       <version>${olingo4.version}</version>
     </dependency>
   </dependencies>
