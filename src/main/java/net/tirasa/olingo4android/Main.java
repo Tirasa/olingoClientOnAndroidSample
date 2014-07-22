@@ -24,6 +24,7 @@ import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.EditText;
 import java.util.Arrays;
+import net.tirasa.olingo4android.net.azurewebsites.odatae2etest.Service;
 import net.tirasa.olingo4android.net.azurewebsites.odatae2etest.microsoft.test.odata.services.odatawcfservice.InMemoryEntities;
 import net.tirasa.olingo4android.net.azurewebsites.odatae2etest.microsoft.test.odata.services.odatawcfservice.types.AccessLevel;
 import net.tirasa.olingo4android.net.azurewebsites.odatae2etest.microsoft.test.odata.services.odatawcfservice.types.Color;
@@ -43,7 +44,7 @@ import org.apache.olingo.client.core.android.http.AndroidHttpClientFactory;
 import org.apache.olingo.commons.api.domain.v4.ODataEntity;
 import org.apache.olingo.commons.api.edm.Edm;
 import org.apache.olingo.commons.api.edm.FullQualifiedName;
-import org.apache.olingo.ext.proxy.Service;
+import org.apache.olingo.ext.proxy.api.PrimitiveCollection;
 
 public class Main extends Activity implements OnClickListener {
 
@@ -257,7 +258,10 @@ public class Main extends Activity implements OnClickListener {
                 product.setDiscontinued(false);
                 product.setUserAccess(AccessLevel.Execute);
                 product.setSkinColor(Color.Blue);
-                product.setCoverColors(Arrays.asList(new Color[] { Color.Green, Color.Red }));
+                final PrimitiveCollection<Color> colors = service.newPrimitiveCollection(Color.class);
+                colors.add(Color.Green);
+                colors.add(Color.Red);
+                product.setCoverColors(colors);
 
                 container.getProducts().add(product);
 

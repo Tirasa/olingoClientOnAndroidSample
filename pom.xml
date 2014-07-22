@@ -135,34 +135,7 @@
           </execution>
         </executions>
       </plugin>
-      
-      <plugin>
-        <artifactId>maven-antrun-plugin</artifactId>
-        <version>1.7</version>
-        <executions>
-          <execution>
-            <phase>package</phase>
-            <configuration>
-              <target>
-                <jar destfile="target/${project.artifactId}.apk"
-                     basedir="target/classes"
-                     update="true" includes="META-INF/**"/>
-              </target>
-            </configuration>
-            <goals>
-              <goal>run</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
     </plugins>
-
-    <resources>
-      <resource>
-        <directory>${project.build.directory}/generated-sources/ojc-plugin/META-INF</directory>
-        <targetPath>${project.build.directory}/classes/META-INF</targetPath>
-      </resource>
-    </resources>
   </build>
 
   <repositories>
