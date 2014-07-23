@@ -23,7 +23,6 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.EditText;
-import java.util.Arrays;
 import net.tirasa.olingo4android.net.azurewebsites.odatae2etest.Service;
 import net.tirasa.olingo4android.net.azurewebsites.odatae2etest.microsoft.test.odata.services.odatawcfservice.InMemoryEntities;
 import net.tirasa.olingo4android.net.azurewebsites.odatae2etest.microsoft.test.odata.services.odatawcfservice.types.AccessLevel;
@@ -249,7 +248,7 @@ public class Main extends Activity implements OnClickListener {
 
             text.append('\n').append("[CUD (proxy)]").append('\n');
             try {
-                Product product = service.newEntityInstance(Product.class);
+                Product product = container.newEntityInstance(Product.class);
                 product.setProductID(productId);
                 product.setName("Latte");
                 product.setQuantityPerUnit("100g Bag");
@@ -258,7 +257,7 @@ public class Main extends Activity implements OnClickListener {
                 product.setDiscontinued(false);
                 product.setUserAccess(AccessLevel.Execute);
                 product.setSkinColor(Color.Blue);
-                final PrimitiveCollection<Color> colors = service.newPrimitiveCollection(Color.class);
+                final PrimitiveCollection<Color> colors = container.newPrimitiveCollection(Color.class);
                 colors.add(Color.Green);
                 colors.add(Color.Red);
                 product.setCoverColors(colors);
