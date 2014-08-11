@@ -24,7 +24,7 @@
   <name>olingoClientOnAndroidSample</name>
 
   <properties>
-    <olingo4.version>0.1.0-SNAPSHOT</olingo4.version>
+    <olingo4.version>4.0.0-beta-01-SNAPSHOT</olingo4.version>
     <platform.version>4.1.1.4</platform.version>
     <android.plugin.version>3.8.2</android.plugin.version>
     
